@@ -1,37 +1,43 @@
+/**
+ * スコアデータのインターフェース定義
+ */
 export interface ScoreRecord {
-    sha256: string;
-    mode: number;
-    clear: number;
-    epg: number;
-    lpg: number;
-    egr: number;
-    lgr: number;
-    egd: number;
-    lgd: number;
-    ebd: number;
-    lbd: number;
-    epr: number;
-    lpr: number;
-    ems: number;
-    lms: number;
-    notes: number;
-    combo: number;
-    minbp: number;
-    playcount: number;
-    clearcount: number;
-    trophy: string;
-    ghost: string;
-    scorehash: string;
-    option: number;
-    random: number;
-    date: number;
-    state: number;
-    seed: number;
-    avgjudge: number;
-    title?: string; // songDataから統合されるタイトル
+    sha256: string;           // SHA256ハッシュ（楽曲識別子）
+    mode: number;             // モード（CN, HCNなど）
+    clear: number;            // クリアランプ（0-9の数値）
+    epg: number;              // EASY PERFECT GREAT
+    lpg: number;              // LIGHT PERFECT GREAT
+    egr: number;              // EASY GREAT
+    lgr: number;              // LIGHT GREAT
+    egd: number;              // EASY GOOD
+    lgd: number;              // LIGHT GOOD
+    ebd: number;              // EASY BAD
+    lbd: number;              // LIGHT BAD
+    epr: number;              // EASY POOR
+    lpr: number;              // LIGHT POOR
+    ems: number;              // EASY MISS
+    lms: number;              // LIGHT MISS
+    notes: number;            // 総ノーツ数
+    combo: number;            // 最大コンボ数
+    minbp: number;            // 最小BAD数
+    playcount: number;        // プレイ回数
+    clearcount: number;       // クリア回数
+    trophy: string;           // トロフィー
+    ghost: string;            // ゴーストデータ
+    scorehash: string;        // スコアハッシュ
+    option: number;           // オプション設定
+    random: number;           // ランダム設定
+    date: number;             // 日付（Unixタイムスタンプ）
+    state: number;            // 状態
+    seed: number;             // シード値
+    avgjudge: number;         // 平均判定
+    title?: string;           // songDataから統合されるタイトル
     tableDifficulty?: string; // tableDataから統合される難易度
 }
 
+/**
+ * クリアランプの数値と文字列のマッピング
+ */
 const clearlamp_map: { [key: number]: string } = {
     0: "NO PLAY",
     1: "FAILED",
@@ -45,6 +51,9 @@ const clearlamp_map: { [key: number]: string } = {
     9: "PERFECT"
 }
 
+/**
+ * オプション設定の数値と文字列のマッピング
+ */
 const option_map: { [key: number]: string } = {
     0: "NORMAL",
     1: "MIRROR",
@@ -58,13 +67,20 @@ const option_map: { [key: number]: string } = {
     9: "S-RANDOM+",
 };
 
+/**
+ * モード設定の数値と文字列のマッピング
+ */
 const mode_map: { [key: number]: string } = {
     0: "",
     1: "CN",
     2: "HCN",
 }
 
-// 数値で保存されている日付をYYYY/MM/DD形式へと変換する
+/**
+ * UnixタイムスタンプをYYYY/MM/DD形式に変換する関数
+ * @param timeNumber - Unixタイムスタンプ（秒単位）
+ * @returns YYYY/MM/DD形式の日付文字列
+ */
 function formatDate(timeNumber: number): string {
     // ミリ秒に変換（ここ重要）
     const date = new Date(timeNumber * 1000);
@@ -75,26 +91,35 @@ function formatDate(timeNumber: number): string {
     return formatted;
 }
 
+/**
+ * スコアデータを表形式で表示するコンポーネント
+ * @param data - 表示するスコアデータの配列
+ */
 export function ScoreTable({ data }: { data: ScoreRecord[] }) {
+    /**
+     * クリアランプに応じた背景色を取得する関数
+     * @param clear - クリアランプの数値
+     * @returns Tailwind CSSのクラス名
+     */
     const getStatusColor = (clear: number): string => {
         switch (clear) {
             case 0:
-                return 'bg-gray-300 dark:bg-gray-700';
+                return 'bg-gray-300 dark:bg-gray-700';  // NO PLAY
             case 1:
-                return 'animate-flash-red';
+                return 'animate-flash-red';             // FAILED（赤色点滅）
             case 3:
-                return 'bg-purple-300 dark:bg-purple-600';
+                return 'bg-purple-300 dark:bg-purple-600'; // ASSIST CLEAR
             case 4:
-                return 'bg-lime-300 dark:bg-lime-600';
+                return 'bg-lime-300 dark:bg-lime-600';   // EASY
             case 5:
-                return 'bg-cyan-300 dark:bg-cyan-500';
+                return 'bg-cyan-300 dark:bg-cyan-500';   // CLEAR
             case 6:
-                return 'bg-white dark:bg-gray-200 border-1 border-gray-400 dark:border-gray-500';
+                return 'bg-white dark:bg-gray-200 border-1 border-gray-400 dark:border-gray-500'; // HARD
             case 7:
-                return 'bg-yellow-300 dark:bg-yellow-600';
+                return 'bg-yellow-300 dark:bg-yellow-600'; // EX-HARD
             case 8:
             case 9:
-                return 'animate-pulse-cyan';
+                return 'animate-pulse-cyan';             // FULL COMBO/PERFECT（シアン色点滅）
             default:
                 return '';
         }
@@ -102,6 +127,7 @@ export function ScoreTable({ data }: { data: ScoreRecord[] }) {
 
     return (
         <>
+            {/* カスタムアニメーションのCSS定義 */}
             <style>{`
                 @keyframes flash-red {
                     0%, 100% { background-color: #374151; }
@@ -121,6 +147,8 @@ export function ScoreTable({ data }: { data: ScoreRecord[] }) {
                     animation: white-cyan 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
                 }
             `}</style>
+
+            {/* スコアデータ表示テーブル */}
             <table className="min-w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700">
                 <thead>
                     <tr className="bg-gray-100 dark:bg-gray-800">
@@ -150,8 +178,10 @@ export function ScoreTable({ data }: { data: ScoreRecord[] }) {
                     </tr>
                 </thead>
                 <tbody>
+                    {/* Unknownタイトルを除外して表示 */}
                     {data.filter(score => score.title !== 'Unknown').map((score, index) => (
                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-900">
+                            {/* クリアランプ表示用の色付きカラム */}
                             <td className={`w-1 border-b ${getStatusColor(score.clear)}`}></td>
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.title}</td>
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.tableDifficulty}</td>
@@ -172,10 +202,6 @@ export function ScoreTable({ data }: { data: ScoreRecord[] }) {
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{option_map[score.option]}</td>
                             {/*<td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.random}</td>*/}
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{formatDate(score.date)}</td>
-                            {/*<td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.state}</td>
-                        */}
-                            {/* <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.seed}</td> */}
-                            {/* <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.avgjudge}</td> */}
                         </tr>
                     ))}
                 </tbody>

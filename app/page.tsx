@@ -5,6 +5,18 @@ import { ScoreTable, ScoreRecord } from './component/scoreTable';
 
 const ITEMS_PER_PAGE = 50;
 
+
+function findTableDifficulty(sha256: string, stRecords: any[], slRecords: any[]): string {
+  if (stRecords.find((record: any) => record.sha256 === sha256)?.level) {
+    return "st" + stRecords.find((record: any) => record.sha256 === sha256)?.level
+  }
+  else if (slRecords.find((record: any) => record.sha256 === sha256)?.level) {
+    return "sl" + slRecords.find((record: any) => record.sha256 === sha256)?.level
+  }
+
+  return "";
+}
+
 export default function Home() {
   const [scoreData, setScoreData] = useState<ScoreRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,22 +31,25 @@ export default function Home() {
         setLoading(true);
 
         // 両方のデータを並行して取得
-        const [scoreResponse, songResponse] = await Promise.all([
+        const [scoreResponse, songResponse, tableResponse] = await Promise.all([
           fetch('/api/score'),
-          fetch('/api/songdata')
+          fetch('/api/songdata'),
+          fetch('/api/table')
         ]);
 
-        if (!scoreResponse.ok || !songResponse.ok) {
+        if (!scoreResponse.ok || !songResponse.ok || !tableResponse.ok) {
           throw new Error('Failed to fetch data');
         }
 
         const scores: ScoreRecord[] = await scoreResponse.json();
         const songs: { [key: string]: SongRecord } = await songResponse.json();
+        const { slRecords, stRecords } = await tableResponse.json();
 
         // scoreDataにsongDataのtitleを統合
         const scoresWithTitles = scores.map(score => ({
           ...score,
-          title: songs[score.sha256]?.title + songs[score.sha256]?.subtitle || 'Unknown'
+          title: songs[score.sha256]?.title + songs[score.sha256]?.subtitle || 'Unknown',
+          tableDifficulty: findTableDifficulty(score.sha256, stRecords, slRecords) || ''
         }));
 
         setScoreData(scoresWithTitles);

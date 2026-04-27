@@ -29,6 +29,7 @@ export interface ScoreRecord {
     seed: number;
     avgjudge: number;
     title?: string; // songDataから統合されるタイトル
+    tableDifficulty?: string; // tableDataから統合される難易度
 }
 
 const clearlamp_map: { [key: number]: string } = {
@@ -125,6 +126,7 @@ export function ScoreTable({ data }: { data: ScoreRecord[] }) {
                     <tr className="bg-gray-100 dark:bg-gray-800">
                         <th className="px-4 py-2 w-1 border-b"></th>
                         <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900 dark:text-gray-100">曲名</th>
+                        <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900 dark:text-gray-100">難易度表</th>
                         <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900 dark:text-gray-100">CNモード</th>
                         <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900 dark:text-gray-100">Clear</th>
                         <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900 dark:text-gray-100">PGREAT</th>
@@ -152,6 +154,7 @@ export function ScoreTable({ data }: { data: ScoreRecord[] }) {
                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-900">
                             <td className={`w-1 border-b ${getStatusColor(score.clear)}`}></td>
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.title}</td>
+                            <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.tableDifficulty}</td>
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{mode_map[score.mode]}</td>
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{clearlamp_map[score.clear]}</td>
                             <td className="px-4 py-2 border-b text-sm text-gray-900 dark:text-gray-100">{score.epg + score.lpg}</td>
